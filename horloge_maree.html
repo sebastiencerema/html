@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marée </title>
+</head>
+<body>
+    <select id="villeSelect" onchange="executerCode()">
+    	<option value="">Choisir un port : </option>
+		<option value="3"  >Dunkerque</option>
+		<option value="5"  >Calais</option>
+		<option value="7"  >Boulogne-sur-Mer</option>
+		<option value="14" >Dieppe</option>
+		<option value="16" >Fécamp</option>
+		<option value="19" >Le Havre</option>
+		<option value="33" >Cherbourg</option>
+		<option value="52" >Saint-Malo</option>
+		<option value="62" >Paimpol</option>
+		<option value="72" >Roscoff</option>
+		<option value="82" >Brest</option>
+		<option value="93" >Concarneau</option>
+		<option value="98" >Ile de Groix (Port-Tudy)</option>
+		<option value="104">Port-Navalo</option>
+		<option value="117">Saint-Nazaire</option>
+		<option value="125">Les Sables-d'Olonne</option>
+		<option value="127">La Rochelle-Pallice</option>
+		<option value="132">Pointe de Grave (Port-Bloc)</option>
+		<option value="136">Arcachon (Jetée d'Eyrac)</option>
+		<option value="140">Boucau-Bayonne / Biarritz</option>
+		<option value="141">Saint-Jean-de-Luz</option>
+    </select>
+    <br>
+    <iframe id="mareeIframe" width="160" height="260" frameborder="0" scrolling="no"></iframe>
+
+    <script>
+        function executerCode() {
+            var selectedVille = document.getElementById("villeSelect").value;
+	        var iframe = document.getElementById("mareeIframe");
+	        //iframe.style.display = "none";
+            iframe.style.display = "block";// Affiche l'iframe
+            if (selectedVille !== "") {
+	            iframe.src = "https://horloge.maree.frbateaux.net/ws" + selectedVille + "?col=1";
+	        } else {
+                iframe.style.display = "none"; // Cache l'iframe
+            }
+        }
+    </script>
+</body>
+</html>

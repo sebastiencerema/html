@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <title>Liste Déroulante Dynamique</title>
+</head>
+<body>
+
+    <div>
+        <select id="firstDropdown">
+            <option value="" selected disabled>Sélectionnez un ensemble de données ... </option>
+        </select>
+    </div>
+    <br> <!-- Ajout d'un saut de ligne pour un espacement visuel -->
+    <div>
+        <select id="secondDropdown">
+            <option value="" selected disabled>Sélectionnez une donnée pour afficher sa description ...</option>
+        </select>
+    </div>
+
+    <br> <!-- Ajout d'un saut de ligne pour un espacement visuel -->
+
+    <div id="info"></div>
+
+    <style> select { font-size: 15px; } </style> 
+
+    <script>
+        const taille_police = '15px';
+        const feuill = 'liste_couches_planif_geolittoral';
+        const last_row = 298 ;
+        const col_1erniv = 'A' ;
+        const col_hierar = 'H' ;
+        const col_couche = 'G' ;
+        const col_descri = 'R' ;
+        const spreadsheetId = '14v6e3eIaOoDg42fzZ1AJukuhqGphZ-bf1ERqG4dB0V8';
+        const firstDropdownRange =  feuill + '!'+col_1erniv+'2:'+col_1erniv+last_row;
+        const secondDropdownRange = feuill + '!'+col_1erniv+'1:'+col_hierar+last_row;
+        const infoRange =           feuill + '!'+col_descri+'1:'+col_descri+last_row;
+        const apiKey = 'AIzaSyBg_eILPALm5X7p6onJXsAGJbBgmXx4lWU'; 
+
+        const firstDropdownUrl =  `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${firstDropdownRange}?key=${apiKey}`;
+        const secondDropdownUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${secondDropdownRange}?key=${apiKey}`;
+        const infoUrl =           `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${infoRange}?key=${apiKey}`;
+
+        // Fonction pour remplir une liste déroulante
+        function populateDropdown(url, dropdownId, fontFamily, fontSize) {
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const dropdown = document.getElementById(dropdownId);
+                    const values = data.values;
+                    const uniqueValues = new Set(); // Utiliser un Set pour stocker les valeurs uniques
+                    values.forEach(row => {
+                        uniqueValues.add(row[0]);
+                    });
+
+                    // Remplir la liste déroulante avec les valeurs uniques
+                    uniqueValues.forEach(value => {
+                        const option = document.createElement('option');
+                        option.value = value;
+                        option.textContent = value;
+                        option.style.fontFamily = fontFamily;
+                        option.style.fontSize = fontSize;
+                        dropdown.appendChild(option);
+                    });
+                    const defaultOption = dropdown.options[0];
+                    defaultOption.style.fontFamily = fontFamily;
+                    defaultOption.style.fontSize = fontSize;
+                });
+        }
+
+        // Remplir la première liste déroulante avec les valeurs de la colonne A
+        populateDropdown(firstDropdownUrl, 'firstDropdown', 'Arial, sans-serif',taille_police);
+
+        // Fonction pour filtrer les éléments de la deuxième liste en fonction de la sélection de la première liste
+        function filterSecondDropdown(selectedValue, fontFamily, fontSize) {
+            fetch(secondDropdownUrl)
+                .then(response => response.json())
+                .then(data => {
+                    const dropdown = document.getElementById('secondDropdown');
+                    dropdown.innerHTML = ''; // Réinitialiser la liste déroulante
+
+                    const values = data.values;
+                    values.forEach((row, index) => {
+                        if (row[0] === selectedValue) {
+                            const option = document.createElement('option');
+                            option.value = row[7];
+                            option.textContent = row[7];
+                            option.dataset.rowIndex = index + 1; // Index de ligne (commence à 1)
+                            //console.log(row[7]);
+                            //console.log(row[6]);
+                            option.style.fontFamily = fontFamily;   
+                            option.style.fontSize = fontSize;
+
+                            dropdown.appendChild(option);
+                        }
+                    });
+                    const defaultOption = dropdown.options[0];
+                    defaultOption.style.fontFamily = fontFamily;
+                    defaultOption.style.fontSize = fontSize;
+                });
+        }
+
+        // Ajouter un événement de changement à la première liste déroulante
+        document.getElementById('firstDropdown').addEventListener('change', () => {
+            const selectedValue = document.getElementById('firstDropdown').value;
+            filterSecondDropdown(selectedValue, 'Arial, sans-serif',taille_police);
+        });
+
+        // Ajouter un événement de changement à la deuxième liste déroulante
+        document.getElementById('secondDropdown').addEventListener('change', () => {
+            const selectedRowIndex = document.getElementById('secondDropdown').options[document.getElementById('secondDropdown').selectedIndex].dataset.rowIndex;
+
+            // Récupérer l'information correspondante de la colonne P
+            fetch(infoUrl)
+                .then(response => response.json())
+                .then(data => {
+                    const info = document.getElementById('info');
+                    info.innerHTML = data.values[selectedRowIndex - 1][0]; // Soustraire 1 pour obtenir l'index correct (commence à 0)
+            });
+        });
+
+    </script>
+
+</body>
+</html>
